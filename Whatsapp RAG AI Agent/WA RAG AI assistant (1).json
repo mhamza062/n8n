@@ -1,0 +1,442 @@
+{
+  "name": "WA RAG AI assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        -320
+      ],
+      "id": "73e1b069-4380-414c-9a80-bc651e55eb5f",
+      "name": "WhatsApp Trigger",
+      "webhookId": "f0130c32-b32c-4338-93bd-031e83d07924",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "uch4Hj9MD7J56WLP",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1155092307687023",
+        "recipientPhoneNumber": "={{ $('Edit Fields').item.json.customer_id }}",
+        "textBody": "={{ $('Message a model').item.json.content.parts[0].text }}",
+        "additionalFields": {
+          "previewUrl": false
+        }
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1616,
+        -144
+      ],
+      "id": "1e54fcb7-ca5e-4358-b045-40b6daba1ad6",
+      "name": "Send message",
+      "webhookId": "7374b919-2dc0-4c1c-9f3b-22d8d9b82664",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "3NeL19llZqVNLm2p",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ead420d2-6ba5-4d3f-9cb0-3741476c5333",
+              "name": "customer_id",
+              "value": "={{ $json.messages[0].from }}",
+              "type": "string"
+            },
+            {
+              "id": "d65e8672-8f6f-4fd4-9e78-34bbc2c1a9d1",
+              "name": "message",
+              "value": "={{ $json.messages[0].text.body }}",
+              "type": "string"
+            },
+            {
+              "id": "1c6962cb-3c5d-4074-8bd6-49de7f64437b",
+              "name": "customer_name",
+              "value": "={{ $json.contacts[0].profile.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -416,
+        -304
+      ],
+      "id": "91ffb5dc-23e5-42b6-a763-b31d2701778b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select role, message from chat_history\nwhere customer_id = '{{ $('Edit Fields').item.json.customer_id }}'\norder by created_at desc\nlimit 15",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -224,
+        -320
+      ],
+      "id": "f9088e48-3a94-43e7-bc26-81347083e49c",
+      "name": "Execute a SQL query",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "UfGeS9odsoAOmVeC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key=AIzaSyCtD91EZ-IoxXHD6TjrY7jyP7IESPP8EQc",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n     \"Content-Type\": \"application/json\",\n  \"User-Agent\": \"n8n/1.0\"\n   }",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": {\n    \"parts\": [\n      {\n        \"text\": \"{{ $item(0).$('Edit Fields').item.json.message }}\"\n      }\n    ]\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        -320
+      ],
+      "id": "21713e20-b030-4093-a542-7f177a128ffd",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://eiascolexfkbhvqaxrjx.supabase.co/rest/v1/rpc/match_documents",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\",\n  \"apikey\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpYXNjb2xleGZrYmh2cWF4cmp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0ODM0NDMsImV4cCI6MjA5NjA1OTQ0M30.Vv_07QHrZ_OAVDbDLBHZWi2EjgXFWpyDBSYlaC4AA6w\",\n  \"Authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpYXNjb2xleGZrYmh2cWF4cmp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0ODM0NDMsImV4cCI6MjA5NjA1OTQ0M30.Vv_07QHrZ_OAVDbDLBHZWi2EjgXFWpyDBSYlaC4AA6w\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query_embedding\": {{ JSON.stringify($json.embedding.values) }},\n  \"match_count\": 3\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        -320
+      ],
+      "id": "3037fa9f-7cc3-48b8-a6e8-5e67912f6fe8",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.full_prompt }}"
+            }
+          ]
+        },
+        "simplify": "={{ true }}",
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        -32,
+        -96
+      ],
+      "id": "f6d8c280-1e8e-4f5f-b229-2aab2b92b8ec",
+      "name": "Message a model",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gZgHPiMRLhXga286",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO chat_history (customer_id, role, message)\nVALUES (\n  '{{ $('Edit Fields').item.json.customer_id }}',\n  'customer',\n  '{{ $('Edit Fields').item.json.message.replace(/'/g, \"''\") }}'\n)",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        864,
+        -176
+      ],
+      "id": "cec2ac10-9ab8-4088-ad1d-50d0a14eae98",
+      "name": "Execute a SQL query1",
+      "credentials": {
+        "postgres": {
+          "id": "UfGeS9odsoAOmVeC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "insert into chat_history (customer_id, role, message)\nvalues (\n  '{{ $('Edit Fields').item.json.customer_id }}',\n  'ai',\n '{{ $('Message a model').item.json.content.parts[0].text.replace(/'/g, \"''\") }}'\n)",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        992,
+        -352
+      ],
+      "id": "c6ab864a-8421-4603-b77c-72e84257af82",
+      "name": "Execute a SQL query2",
+      "credentials": {
+        "postgres": {
+          "id": "UfGeS9odsoAOmVeC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO customer_profiles (customer_id, name, last_issue)\nVALUES (\n  '{{ $('Edit Fields').item.json.customer_id }}',\n  '{{ $('Edit Fields').item.json.customer_name.replace(/'/g, \"''\") }}',\n  '{{ $('Edit Fields').item.json.message.replace(/'/g, \"''\") }}'\n)\nON CONFLICT (customer_id)\nDO UPDATE SET  \n  last_issue = '{{ $('Edit Fields').item.json.message.replace(/'/g, \"''\") }}',  \n  updated_at = NOW();",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1280,
+        -288
+      ],
+      "id": "5edd4b71-88be-41bb-bbff-9312ea1d55db",
+      "name": "Execute a SQL query3",
+      "credentials": {
+        "postgres": {
+          "id": "UfGeS9odsoAOmVeC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "205880fd-30de-4326-9687-71dc7a847f0c",
+              "name": "full_prompt",
+              "value": "=You are a helpful, friendly customer support Whatsapp AI agent.\n\nCUSTOMER PROFILE:\nName: {{ $('Edit Fields').item.json.customer_name ?? 'Unknown' }}\nCustomer ID: {{ $('Edit Fields').item.json.customer_id }}\n\nCHAT HISTORY:\n{{ $items('Execute a SQL query').map(function(item) { return item.json.role + ': ' + item.json.message; }).reverse().join('\\n') }}\n\nKNOWLEDGE BASE (relevant FAQ answers):\n{{ $items('HTTP Request1').filter(function(item) { return item.json.similarity >= 0.35; }).map(function(item) { return item.json.content; }).join('\\n\\n') }}\n\nCustomer's new message: {{ $('Edit Fields').item.json.message }}\n\nInstructions:\n- If the KNOWLEDGE BASE section above is empty, it means the user is just greeting you (like hi, hello, hey) or he/she is talking something else or having general small talk(you should sense user intention too and reply accordingly in good, professional, humanly, manner). In this case, respond politely and warmly as a friendly support agent without saying you don't know.\n- If the KNOWLEDGE BASE has content, answer the user's question strictly using that information.\n- Use the customer's name if you know it.\n- Reference their history naturally if relevant.\n- Keep your reply short, warm, and helpful.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        -384
+      ],
+      "id": "0b7da977-b61a-407c-beac-994d62bc942e",
+      "name": "Edit Fields1",
+      "executeOnce": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1155092307687023",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+        "textBody": "=Hi {{ $('Edit Fields').item.json.customer_name }}, \nSorry there is a syste load at this time, We have receive your message and we will reply in a short time, We are sorry for inconvience",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        32
+      ],
+      "id": "d661f5c5-3ef7-4dd6-856b-86d70e5384e8",
+      "name": "Send message1",
+      "webhookId": "9899b592-3ff0-48b7-89ab-9d752e7f2446",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "3NeL19llZqVNLm2p",
+          "name": "WhatsApp account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query1": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query2": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query3": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message1": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "16e95882-f453-40a4-8eeb-0479ce6319c9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7835cb3900c10fb57f784d2b575465e1860354d09133e05a0489e663d20c844a"
+  },
+  "id": "58cqDHjHlBL8mn9Y",
+  "tags": []
+}
