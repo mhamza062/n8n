@@ -1,0 +1,298 @@
+{
+  "name": "Google Maps Lead Gen - Apify Native Node",
+  "nodes": [
+    {
+      "parameters": {
+        "actorSource": "store",
+        "actorId": {
+          "__rl": true,
+          "value": "nwua9Gu5YrADL7ZDj",
+          "mode": "list",
+          "cachedResultName": "Google Maps Scraper (compass/crawler-google-places)",
+          "cachedResultUrl": "https://console.apify.com/actors/nwua9Gu5YrADL7ZDj/input"
+        },
+        "customBody": "={\n  \"searchStringsArray\": [\n    \"{{ $json['Whats Your Google Search Maps Query?'] }}\"\n  ],\n  \"locationQuery\": \"sheikhupura, pakistan\",\n  \"maxCrawledPlacesPerSearch\": 100,\n  \"zoom\": 13,\n  \"walkingBySubdivisions\": true,\n  \"gridSubdivisions\": 5,\n  \"language\": \"en\",\n  \"enableCompetitorAnalysis\": false,\n  \"includeWebResults\": false,\n  \"maxCompetitorsToAnalyze\": 30,\n  \"maximumLeadsEnrichmentRecords\": 0,\n  \"scrapeContacts\": false,\n  \"scrapeDirectories\": false,\n  \"scrapeImageAuthors\": false,\n  \"scrapeOrderOnline\": false,\n  \"scrapePlaceDetailPage\": false,\n  \"scrapeReviewsPersonalData\": true,\n  \"scrapeSocialMediaProfiles\": {\n    \"facebooks\": false,\n    \"instagrams\": false,\n    \"tiktoks\": false,\n    \"twitters\": false,\n    \"youtubes\": false\n  },\n  \"scrapeTableReservationProvider\": false,\n  \"skipClosedPlaces\": false,\n  \"verifyLeadsEnrichmentEmails\": false\n}\n"
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        -672
+      ],
+      "id": "dd8ef3ef-9fff-47fd-8d37-91872f070c5d",
+      "name": "Apify: Run Scraper",
+      "credentials": {
+        "apifyApi": {
+          "id": "tslsvvkiY01W8x5S",
+          "name": "Apify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Datasets",
+        "datasetId": "={{ $json.defaultDatasetId }}",
+        "limit": null,
+        "options": {}
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        -432
+      ],
+      "id": "5656b6c5-cf88-4856-89cc-ca4b939c60d0",
+      "name": "Apify: Get Scraped Data",
+      "credentials": {
+        "apifyApi": {
+          "id": "tslsvvkiY01W8x5S",
+          "name": "Apify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Query?",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Whats Your Google Search Maps Query?"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -1456,
+        -688
+      ],
+      "id": "9d0bc491-25a8-4d1c-96e7-10db44e669a2",
+      "name": "On form submission",
+      "webhookId": "243d69f3-fa2f-4eab-aab2-bbfbe25499ed"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4c38f49b-0c98-4242-a5dc-10899c62d03f",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "4d2880f7-be47-4c97-a83c-3673ee3fbab1",
+              "name": "categoryName",
+              "value": "={{ $json.categoryName }}",
+              "type": "string"
+            },
+            {
+              "id": "9aae4330-9aa0-43e3-b8b0-767b466f0f26",
+              "name": "address",
+              "value": "={{ $json.address }}",
+              "type": "string"
+            },
+            {
+              "id": "08bc322e-104e-4257-9fb1-c8a321a1296b",
+              "name": "city",
+              "value": "={{ $json.city }}",
+              "type": "string"
+            },
+            {
+              "id": "d786b6fa-05fe-48af-90bb-31f0c443a583",
+              "name": "phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "05036d91-48f4-433d-8a26-4f2baee773ea",
+              "name": "phoneUnformatted",
+              "value": "={{ $json.phoneUnformatted }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -912,
+        -528
+      ],
+      "id": "9e9d4050-d002-4488-a881-b15a85b16df9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1OCKS0Vq1rdLahru-K48A9ZhXvOSL0p3nQJxwmwTYnFA",
+          "mode": "list",
+          "cachedResultName": "sheikhupura cosmetics leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OCKS0Vq1rdLahru-K48A9ZhXvOSL0p3nQJxwmwTYnFA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 140169939,
+          "mode": "list",
+          "cachedResultName": "beauty saloon",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OCKS0Vq1rdLahru-K48A9ZhXvOSL0p3nQJxwmwTYnFA/edit#gid=140169939"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title }}",
+            "categoryName": "={{ $json.categoryName }}",
+            "address": "={{ $json.address }}",
+            "city": "={{ $json.city }}",
+            "phone": "={{ $json.phone }}",
+            "phoneUnformatted": "={{ $json.phoneUnformatted }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "categoryName",
+              "displayName": "categoryName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "address",
+              "displayName": "address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phoneUnformatted",
+              "displayName": "phoneUnformatted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -688,
+        -512
+      ],
+      "id": "131c7ea0-3e28-4515-9e0b-6876f9d7e699",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "769jcsHHSbxEca0E",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Apify: Run Scraper": {
+      "main": [
+        [
+          {
+            "node": "Apify: Get Scraped Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Apify: Run Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apify: Get Scraped Data": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c79178b1-f326-48d0-b2b0-8044ae5046c0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7835cb3900c10fb57f784d2b575465e1860354d09133e05a0489e663d20c844a"
+  },
+  "id": "65cxC2xDUhA8gJPg",
+  "tags": []
+}
